@@ -1,0 +1,225 @@
+<!doctype html>
+<html>
+	<head>
+		<title>Source-Live Latency Test</title>
+		<meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		<link href='http://fonts.googleapis.com/css?family=Alike' rel='stylesheet' type='text/css'>
+		<meta http-equiv="X-UA-Compatible" content="IE=edge">
+		<meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+		<meta http-equiv="PRAGMA" content="NO-CACHE">
+		<meta name="description" content="">
+		<meta name="author" content="">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="description" content="Source-Live ADR Latency Test">
+	
+		<link rel="stylesheet" href="../index_files/bootstrap.css">
+		<link rel="stylesheet" href="../index_files/c2_reen.css">
+		<link rel="stylesheet" href="../index_files/c3_gray.css">
+		<link rel="stylesheet" href="../index_files/font-awesome.css">
+		<link rel="stylesheet" href="../index_files/fontello.css">
+		<link rel="stylesheet" href="../index_files/lato.css">
+		<link rel="stylesheet" href="../index_files/notifications.css">
+		<link rel="stylesheet" href="../index_files/sanspro.css">
+		<link rel="stylesheet" href="../index_files/se.css">
+		<link rel="stylesheet" href="../index_files/source-elements-font.css">
+		<link rel="stylesheet" href="../index_files/z_gateway.css">
+	
+		<script src="../index_files/jquery.min.js"></script> 
+		<script src="../index_files/bootstrap.min.js"></script> 
+		<script src="../index_files/adapter-latest.js"></script> 
+		<!-- <script type="text/javascript" src="./index_files/instascan.js"></script> -->
+  
+		<style type="text/css">
+			body {
+			color: #f7f7f7
+			}
+
+			div.vague { color: lightgrey; }
+		
+			input {
+			color: #fff
+			}
+		
+			btn {
+			border-radius: 10px;
+			background-color: #ccc;
+			font-weight: bold
+			}
+
+			.title {
+			margin: 0px !important;
+			}
+			/* #note { font-size: 164px; } */
+			#detector { width: 300px; height: 300px; border: 4px solid gray; border-radius: 8px; text-align: center; padding-top: 10px;}
+			#output { width: 300px; height: 42px; }
+			#note { display: inline-block; height:180px; text-align: left;}
+			#flat { display: none; }
+			#sharp { display: none; }
+			.flat #flat { display: inline; }
+			.sharp #sharp { display: inline; }
+
+			.mstext {
+			display: block;
+			clear: both;
+			}
+		
+			.msdisplay {
+			border-radius: 10px;
+			display: block;
+			background-color: #555;
+			padding: 10px;
+			}
+		
+			.navbar-toggler {
+			float: right;
+			border: none;
+			padding-right: 0;
+			}
+		
+			.navbar-toggler:active,
+			.navbar-toggler:focus {
+			outline: none;
+			}
+		
+			.navbar-light .navbar-toggler-icon {
+			width: 24px;
+			height: 17px;
+			background-image: none;
+			position: relative;
+			border-bottom: 1px solid #000;
+			transition: all 300ms linear;
+			}
+		
+			.navbar-light .navbar-toggler-icon:after,
+			.navbar-light .navbar-toggler-icon:before {
+			width: 24px;
+			position: absolute;
+			height: 1px;
+			background-color: #000;
+			top: 0;
+			left: 0;
+			content: '';
+			z-index: 2;
+			transition: all 300ms linear;
+			}
+		
+			.navbar-light .navbar-toggler-icon:after {
+			top: 8px;
+			}
+		
+			.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon:after {
+			transform: rotate(45deg);
+			}
+		
+			.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon:before {
+			transform: translateY(8px) rotate(-45deg);
+			}
+		
+			.navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+			border-color: transparent;
+			}
+		
+			@media (min-width: 769px) {
+				.navbar-toggler {
+					display: none;
+				}
+			
+				.controls {
+					padding: 10px 30px;
+				}
+			
+				.user-field {
+					padding: 10px 30px;
+				}
+			}
+		
+			@media (max-width: 991px) {
+			.navbar-collapse.show {
+				display: block !important;
+				visibility: visible !important;
+			}
+			}
+		
+			@media(max-width: 768px) {
+			
+			}
+		</style>
+	</head>
+	<body cz-shortcut-listen="true">
+		<script src="js/pitchdetect.js"></script>
+		<div>
+			<nav-bar>
+				<div class="navbar yamm start-style navbar-light">
+					<div class="container">
+						<a class="navbar-brand" href="#"><img src="./index_files/sc-logo-icon-green.svg" class="logo" alt=""></a>
+			
+						<button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="openNav()">
+						<span class="navbar-toggler-icon"></span>
+						</button>
+						<div class="navbar-collapse collapse" id="navbarSupportedContent">
+							<ul class="nav navbar-nav pull-left">
+								<li>
+								<a>Source-Live ADR Latency Test</a>
+								</li>
+							</ul>
+						</div>
+			
+					</div>
+				</div>
+			</nav-bar>
+			<!-- redesign this so it scales for mobile -->
+			<div class="container" style="width:100%">
+				<h2>Beep Sound Detection</h2>
+				<!-- <hr class="title"> -->
+				<div class="btn-field">
+					<div class="controls">
+						<div id="detector" class="vague">
+							<div class="pitch"><span id="pitch">--</span>Hz</div>
+							<div class="note"><span id="note">--</span></div>   
+							<canvas id="output" width=300 height=42></canvas>
+							<div id="detune"><span id="detune_amt">--</span><span id="flat">cents &#9837;</span><span id="sharp">cents &#9839;</span></div>
+						</div>
+					<div>
+						<span class="mstext"> Delay in milliseconds:</span>
+						<span id="milliseconds" class="msdisplay">00000</span>
+					</div>	
+					<p>
+						<!-- <button onclick="this.innerText = togglePlayback()">use demo audio</button> -->
+						<button id="get_laytency" onclick="this.innerText = toggleLiveInput()" class="btn">Get Laytency</button>
+						<!-- <button onclick="this.innerText = toggleOscillator()">use oscillator</button> -->
+						<!--<button onclick="updatePitch(0);">sample</button>-->
+					</p>
+					</div>
+				</div>
+			
+			</div>
+			<hr>
+		
+			<div class="container user-field" style="width:100%">
+				<h3>USER GUIDE</h3>
+				<p><strong>Step 1.</strong><br>Hold up your phone to the Source-Live Pro video window, and hold up your iPad, so
+					you can see both screens at the same time with your phone camera.</p>
+				<p><strong>Step 2.</strong><br>Click the Get Latency button</p>
+				<p><strong>Step 3.</strong><br>Tell your Source-Live player what your delay is</p>
+			</div>
+			<hr>
+		</div>
+
+		<!-- just used for debugging
+		<canvas id="waveform" width="512" height="256"></canvas>
+		-->
+
+		<script type="text/javascript">
+
+			var _gaq = _gaq || [];
+			_gaq.push(['_setAccount', 'UA-35593052-1']);
+			_gaq.push(['_trackPageview']);
+
+			(function() {
+				var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+				ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+				var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+			})();
+		</script>
+	</body>
+</html>

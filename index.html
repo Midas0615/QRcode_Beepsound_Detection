@@ -1,0 +1,227 @@
+<!-- saved from url=(0035)https://5e84f0e946dd3.htmlsave.net/ -->
+<html lang="en"><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+  
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta http-equiv="CACHE-CONTROL" content="NO-CACHE">
+    <meta http-equiv="PRAGMA" content="NO-CACHE">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Source-Live ADR Latency Test">
+  
+    <link rel="stylesheet" href="./index_files/bootstrap.css">
+    <link rel="stylesheet" href="./index_files/c2_reen.css">
+    <link rel="stylesheet" href="./index_files/c3_gray.css">
+    <link rel="stylesheet" href="./index_files/font-awesome.css">
+    <link rel="stylesheet" href="./index_files/fontello.css">
+    <link rel="stylesheet" href="./index_files/lato.css">
+    <link rel="stylesheet" href="./index_files/notifications.css">
+    <link rel="stylesheet" href="./index_files/sanspro.css">
+    <link rel="stylesheet" href="./index_files/se.css">
+    <link rel="stylesheet" href="./index_files/source-elements-font.css">
+    <link rel="stylesheet" href="./index_files/z_gateway.css">
+  
+    <title>Source-Live Latency Test</title>
+    <script src="./index_files/jquery.min.js"></script> 
+    <script src="./index_files/bootstrap.min.js"></script> 
+    <script src="./index_files/adapter-latest.js"></script> 
+    <script type="text/javascript" src="./index_files/instascan.js"></script>
+  
+  <style type="text/css">
+    body {
+      color: #f7f7f7
+    }
+  
+    input {
+      color: #fff
+    }
+  
+    btn {
+      border-radius: 10px;
+      background-color: #ccc;
+      font-weight: bold
+    }
+  
+    .video-container {
+      padding: 40px 20px;
+      text-align: center;
+    }
+  
+    .video-field {
+      width: 720px;
+      height: 480px;
+    }
+  
+    .mstext {
+  
+      display: block;
+      clear: both;
+    }
+  
+    .msdisplay {
+      border-radius: 10px;
+      display: block;
+      background-color: #555;
+      padding: 10px;
+    }
+  
+    .navbar-toggler {
+      float: right;
+      border: none;
+      padding-right: 0;
+    }
+  
+    .navbar-toggler:active,
+    .navbar-toggler:focus {
+      outline: none;
+    }
+  
+    .navbar-light .navbar-toggler-icon {
+      width: 24px;
+      height: 17px;
+      background-image: none;
+      position: relative;
+      border-bottom: 1px solid #000;
+      transition: all 300ms linear;
+    }
+  
+    .navbar-light .navbar-toggler-icon:after,
+    .navbar-light .navbar-toggler-icon:before {
+      width: 24px;
+      position: absolute;
+      height: 1px;
+      background-color: #000;
+      top: 0;
+      left: 0;
+      content: '';
+      z-index: 2;
+      transition: all 300ms linear;
+    }
+  
+    .navbar-light .navbar-toggler-icon:after {
+      top: 8px;
+    }
+  
+    .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon:after {
+      transform: rotate(45deg);
+    }
+  
+    .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon:before {
+      transform: translateY(8px) rotate(-45deg);
+    }
+  
+    .navbar-toggler[aria-expanded="true"] .navbar-toggler-icon {
+      border-color: transparent;
+    }
+  
+    @media (min-width: 769px) {
+      .navbar-toggler {
+        display: none;
+      }
+  
+      .controls {
+        padding: 10px 30px;
+      }
+  
+      .user-field {
+        padding: 10px 30px;
+      }
+  
+      .video {
+        width: 90%;
+        margin: auto;
+        max-height: 600px;
+      }
+    }
+  
+    @media (max-width: 991px) {
+      .navbar-collapse.show {
+        display: block !important;
+        visibility: visible !important;
+      }
+    }
+  
+    @media(max-width: 768px) {
+      .video-container {
+        margin-top: 10px;
+        padding: 16px 5px;
+        width: 100%;
+        height: 200px;
+        max-height: 290px;
+        overflow: hidden;
+        position: relative;
+      }
+  
+      video {
+        -moz-transform: rotate(90deg);
+        -webkit-transform: rotate(90deg);
+        -o-transform: rotate(90deg);
+        -ms-transform: rotate(90deg);
+        transform: rotate(90deg);
+      }
+  
+      .video {
+        width: 100%;
+        object-fit: cover;
+        position: absolute;
+        top: 0%;
+        left: 0%;
+        /* transform: scaleX(-1) translate(50%, -50%) !important; */
+        transform: scaleX(1) !important;
+      }
+      .btngroup {
+        display: flex; 
+        justify-content:space-between;
+      }
+  
+      #videoSource {
+        border-radius: 3px;
+      }
+    }
+  </style></head>
+  
+  <body cz-shortcut-listen="true">
+    <div>
+      <nav-bar>
+        <div class="navbar yamm start-style navbar-light">
+          <div class="container">
+            <a class="navbar-brand" href="#"><img src="./index_files/sc-logo-icon-green.svg" class="logo" alt=""></a>
+  
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation" onclick="openNav()">
+              <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="navbar-collapse collapse" id="navbarSupportedContent">
+              <ul class="nav navbar-nav pull-left">
+                <li>
+                  <a>Source-Live ADR Latency Test</a>
+                </li>
+              </ul>
+  
+              <ul class="nav navbar-nav pull-right">
+                <li>
+                  <a href="#">HELP</a>
+                </li>
+              </ul>
+            </div>
+  
+          </div>
+        </div>
+      </nav-bar>
+      
+  
+      <!-- redesign this so it scales for mobile -->
+      <h2>Detection</h2>
+        <p>
+            How would you like to get the delay?
+        </p>
+        <a href="camera.html">
+           <button class="btn">Camera</button>
+        </a>
+        <br>
+        <a href="./audio/index.html">
+            <button class="btn">Record</button>
+        </a>
+      <hr>
+    </div>
+  </body>
+  </html>
