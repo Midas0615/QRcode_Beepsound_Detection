@@ -43,6 +43,7 @@ var detectorElem,
 	pitch,
 	pitch_calc,
 	delay,
+	bufferLength,
 	intervalCounter = null;
 
 window.onload = function() {
@@ -93,7 +94,41 @@ window.onload = function() {
 	  	reader.readAsArrayBuffer(e.dataTransfer.files[0]);
 	  	return false;
 	};
+}
 
+function snsNoiseFilter(alphaValue, betaValue) {
+    this.alpha = alphaValue;
+    if (this.alpha === undefined) {
+        this.alpha = 1.8;
+    }
+    this.beta = betaValue;
+    if (this.beta === undefined) {
+        this.beta = 0.03;
+    }
+    this.noise;
+    this.noiseSum = 0;
+    var sumFunction = function(a, b) {
+        return a + b;
+    };
+
+    this.getNoise = function(input) {
+        if (this.noiseSum == 0) {
+            this.noise = input;
+            this.noiseSum = this.noise.reduce(sumFunction, 0);
+            return this.noise;
+        }
+        var inputSum = input.reduce(sumFunction, 0);
+        var xnr = inputSum / this.noiseSum;
+        if (xnr > this.alpha) {
+            return this.noise;
+        }
+        var oneMinusBetaFactor = 1 - this.beta;
+        for (var i = 0; i < input.length; i++) {
+            this.noise[i] = oneMinusBetaFactor * this.noise[i] + this.beta * input[i];
+        }
+        this.noiseSum = oneMinusBetaFactor * inputSum + this.beta * this.noiseSum;
+        return this.noise;
+    };
 }
 
 function error() {
@@ -105,12 +140,16 @@ function getUserMedia(dictionary, callback) {
         navigator.getUserMedia = 
         	navigator.getUserMedia ||
         	navigator.webkitGetUserMedia ||
-        	navigator.mozGetUserMedia;
+			navigator.mozGetUserMedia ||
+			navigator.msGetUserMedia;
         navigator.getUserMedia(dictionary, callback, error);
     } catch (e) {
         alert('getUserMedia threw exception :' + e);
     }
 }
+
+var noiseFilter = new snsNoiseFilter();
+
 
 function gotStream(stream) {
     // Create an AudioNode from the stream.
@@ -122,25 +161,36 @@ function gotStream(stream) {
 
     // Connect it to the destination.
     analyser = audioContext.createAnalyser();
-    analyser.fftSize = 2048;
+	analyser.minDecibels = -90;
+	analyser.maxDecibels = -10;
+	analyser.smoothingTimeConstant = 0.85;
+	analyser.fftSize = 128;
+	bufferLength = analyser.frequencyBinCount;
+
+	var distortion = audioContext.createWaveShaper();
+	var gainNode = audioContext.createGain();
+	var biquadFilter = audioContext.createBiquadFilter();
+	var convolver = audioContext.createConvolver();
+
 	mediaStreamSource.connect( analyser );
-	analyser.connect( audioContext.destination );
-    sourceNode.start( 0 );
+	analyser.connect(distortion);
+	distortion.connect(biquadFilter);
+	biquadFilter.connect(convolver);
+	convolver.connect(gainNode);
+	gainNode.connect(audioContext.destination);
+	sourceNode.start( 0 );
 	isPlaying = true;
-	console.log("isPlaying..2", isPlaying)
-	console.log("milliseconds", document.getElementById("milliseconds").innerHTML);
-	
-	console.log("milliseconds_2", document.getElementById("milliseconds").innerHTML);
 	isLiveInput = false;
 	updatePitch();
 }
+
+
 
 function toggleLiveInput() {
 	console.log("isPlaying..", isPlaying)
     if (isPlaying) {
         //stop playing and return
 		// sourceNode.stop( 0 );
-		// console.log("sourceNode.stop..!!", sourceNode.stop( 0 )) 
 		if (intervalCounter!= null) {
 			clearInterval(intervalCounter);
 			intervalCounter = null;
@@ -150,10 +200,6 @@ function toggleLiveInput() {
 		isPlaying = false;
 		isStarted = false;
 		delay = "00000";
-		// document.getElementById("milliseconds").innerHTML = delay;
-		console.log("delay..", delay)
-		// document.getElementById("milliseconds").innerHTML = delay
-		console.log("delay....2", document.getElementById("milliseconds").innerHTML)
 		if (!window.cancelAnimationFrame)
 			window.cancelAnimationFrame = window.webkitCancelAnimationFrame;
 		window.cancelAnimationFrame( rafID );
@@ -172,6 +218,7 @@ function toggleLiveInput() {
                 "optional": []
             },
 		}, 
+		// {audio: true},
 		gotStream);
 	return "stop"
 }
@@ -195,42 +242,6 @@ function frequencyFromNoteNumber( note ) {
 function centsOffFromPitch( frequency, note ) {
 	return Math.floor( 1200 * Math.log( frequency / frequencyFromNoteNumber( note ))/Math.log(2) );
 }
-
-// this is a float version of the algorithm below - but it's not currently used.
-/*
-function autoCorrelateFloat( buf, sampleRate ) {
-	var MIN_SAMPLES = 4;	// corresponds to an 11kHz signal
-	var MAX_SAMPLES = 1000; // corresponds to a 44Hz signal
-	var SIZE = 1000;
-	var best_offset = -1;
-	var best_correlation = 0;
-	var rms = 0;
-
-	if (buf.length < (SIZE + MAX_SAMPLES - MIN_SAMPLES))
-		return -1;  // Not enough data
-
-	for (var i=0;i<SIZE;i++)
-		rms += buf[i]*buf[i];
-	rms = Math.sqrt(rms/SIZE);
-
-	for (var offset = MIN_SAMPLES; offset <= MAX_SAMPLES; offset++) {
-		var correlation = 0;
-
-		for (var i=0; i<SIZE; i++) {
-			correlation += Math.abs(buf[i]-buf[i+offset]);
-		}
-		correlation = 1 - (correlation/SIZE);
-		if (correlation > best_correlation) {
-			best_correlation = correlation;
-			best_offset = offset;
-		}
-	}
-	if ((rms>0.1)&&(best_correlation > 0.1)) {
-		console.log("f = " + sampleRate/best_offset + "Hz (rms: " + rms + " confidence: " + best_correlation + ")");
-	}
-//	var best_frequency = sampleRate/best_offset;
-}
-*/
 
 var MIN_SAMPLES = 0;  // will be initialized when AudioContext is created.
 var GOOD_ENOUGH_CORRELATION = 0.9; // this is the "bar" for how close a correlation needs to be
@@ -294,6 +305,10 @@ function updatePitch( time ) {
 	var cycles = new Array;
 	analyser.getFloatTimeDomainData( buf );
 	var ac = autoCorrelate( buf, audioContext.sampleRate );
+	var dataArray = new Uint8Array(bufferLength);
+    analyser.getByteFrequencyData(dataArray);
+    var noise = noiseFilter.getNoise(dataArray);
+    console.log("noise...", noise);
 	// TODO: Paint confidence meter on canvasElem here.
 
 	// if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
