@@ -1,4 +1,3 @@
-
 window.AudioContext = window.AudioContext || window.webkitAudioContext;
 
 var isStarted = false;
@@ -7,12 +6,9 @@ var isPlaying = false;
 var sourceNode = null;
 var analyser = null;
 var theBuffer = null;
-var DEBUGCANVAS = null;
 var mediaStreamSource = null; 
 var Counter = 0;
 var detectorElem, 
-	canvasElem,
-	waveCanvas,
 	pitchElem,
 	noteElem,
 	notenum,
@@ -38,12 +34,7 @@ window.onload = function() {
 
 	detectorElem = document.getElementById( "detector" );
 	canvasElem = document.getElementById( "output" );
-	DEBUGCANVAS = document.getElementById( "waveform" );
-	if (DEBUGCANVAS) {
-		waveCanvas = DEBUGCANVAS.getContext("2d");
-		waveCanvas.strokeStyle = "black";
-		waveCanvas.lineWidth = 1;
-	}
+
 	pitchElem = document.getElementById( "pitch" );
 	noteElem = document.getElementById( "note" );
 	detuneElem = document.getElementById( "detune" );
@@ -114,12 +105,12 @@ function error() {
 
 function getUserMedia(dictionary, callback) {
     try {
-        navigator.mediaDevices.getUserMedia = 
-        	navigator.mediaDevices.getUserMedia ||
-        	navigator.mediaDevices.webkitGetUserMedia ||
-			navigator.mediaDevices.mozGetUserMedia ||
-			navigator.mediaDevices.msGetUserMedia;
-			navigator.mediaDevices.getUserMedia(dictionary, callback, error);
+        navigator.getUserMedia = 
+		navigator.getUserMedia ||
+		navigator.webkitGetUserMedia ||
+		navigator.mozGetUserMedia ||
+		navigator.msGetUserMedia;
+        navigator.getUserMedia(dictionary, callback, error);
     } catch (e) {
         alert('getUserMedia threw exception :' + e);
     }
@@ -190,6 +181,7 @@ function toggleLiveInput() {
                 "optional": []
             },
 		}, 
+		// {audio: true},
 		gotStream);
 	return "stop"
 }
@@ -264,7 +256,9 @@ function autoCorrelate( buf, sampleRate ) {
 function updatePitch( time ) {
 	var cycles = new Array;
 	analyser.getFloatTimeDomainData( buf );
+	console.log("audioContext.sampleRate", audioContext.sampleRate);
 	var ac = autoCorrelate( buf, audioContext.sampleRate );
+	console.log("ac", ac);
 	var dataArray = new Uint8Array(bufferLength);
     analyser.getByteFrequencyData(dataArray);
     var noise = noiseFilter.getNoise(dataArray);
@@ -283,6 +277,9 @@ function updatePitch( time ) {
 	 	var note =  noteFromPitch( pitch );
 		noteElem.innerHTML = noteStrings[note%12];
 		notenum = Number(note);
+		console.log("buf", buf);
+		console.log("bufferLength", bufferLength);
+		console.log("dataArray", dataArray);
 		console.log("pitch_calc", pitch_calc);
 		console.log("notenum", notenum);
 		console.log("detune", detune);
@@ -298,7 +295,7 @@ function updatePitch( time ) {
 			detuneAmount.innerHTML = Math.abs( detune );
 		}
 
-		if (pitch_calc == 1002 || pitch_calc == 1000 && notenum == 83 && detune == 25 || detune == 21)
+		if ((pitch_calc == 1002 || pitch_calc == 1000) && notenum == 83 && (detune == 25 || detune == 21))
 		{	
 			console.log("pitch_calc__1", pitch_calc);
 			console.log("notenum", notenum);
