@@ -114,12 +114,12 @@ function error() {
 
 function getUserMedia(dictionary, callback) {
     try {
-        navigator.getUserMedia = 
-        	navigator.getUserMedia ||
-        	navigator.webkitGetUserMedia ||
-			navigator.mozGetUserMedia ||
-			navigator.msGetUserMedia;
-        navigator.getUserMedia(dictionary, callback, error);
+        navigator.mediaDevices.getUserMedia = 
+        	navigator.mediaDevices.getUserMedia ||
+        	navigator.mediaDevices.webkitGetUserMedia ||
+			navigator.mediaDevices.mozGetUserMedia ||
+			navigator.mediaDevices.msGetUserMedia;
+			navigator.mediaDevices.getUserMedia(dictionary, callback, error);
     } catch (e) {
         alert('getUserMedia threw exception :' + e);
     }
