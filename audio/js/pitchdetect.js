@@ -187,10 +187,8 @@ function gotStream(stream) {
 
 
 function toggleLiveInput() {
-	console.log("isPlaying..", isPlaying)
     if (isPlaying) {
-        //stop playing and return
-		// sourceNode.stop( 0 );
+		sourceNode.stop( 0 );
 		if (intervalCounter!= null) {
 			clearInterval(intervalCounter);
 			intervalCounter = null;
@@ -279,26 +277,15 @@ function autoCorrelate( buf, sampleRate ) {
 				best_offset = offset;
 			}
 		} else if (foundGoodCorrelation) {
-			// short-circuit - we found a good correlation, then a bad one, so we'd just be seeing copies from here.
-			// Now we need to tweak the offset - by interpolating between the values to the left and right of the
-			// best offset, and shifting it a bit.  This is complex, and HACKY in this code (happy to take PRs!) -
-			// we need to do a curve fit on correlations[] around best_offset in order to better determine precise
-			// (anti-aliased) offset.
-
-			// we know best_offset >=1, 
-			// since foundGoodCorrelation cannot go to true until the second pass (offset=1), and 
-			// we can't drop into this clause until the following pass (else if).
 			var shift = (correlations[best_offset+1] - correlations[best_offset-1])/correlations[best_offset];  
 			return sampleRate/(best_offset+(8*shift));
 		}
 		lastCorrelation = correlation;
 	}
 	if (best_correlation > 0.01) {
-		// console.log("f = " + sampleRate/best_offset + "Hz (rms: " + rms + " confidence: " + best_correlation + ")")
 		return sampleRate/best_offset;
 	}
 	return -1;
-//	var best_frequency = sampleRate/best_offset;
 }
 
 function updatePitch( time ) {
@@ -308,32 +295,6 @@ function updatePitch( time ) {
 	var dataArray = new Uint8Array(bufferLength);
     analyser.getByteFrequencyData(dataArray);
     var noise = noiseFilter.getNoise(dataArray);
-    console.log("noise...", noise);
-	// TODO: Paint confidence meter on canvasElem here.
-
-	// if (DEBUGCANVAS) {  // This draws the current waveform, useful for debugging
-	// 	waveCanvas.clearRect(0,0,512,256);
-	// 	waveCanvas.strokeStyle = "red";
-	// 	waveCanvas.beginPath();
-	// 	waveCanvas.moveTo(0,0);
-	// 	waveCanvas.lineTo(0,256);
-	// 	waveCanvas.moveTo(128,0);
-	// 	waveCanvas.lineTo(128,256);
-	// 	waveCanvas.moveTo(256,0);
-	// 	waveCanvas.lineTo(256,256);
-	// 	waveCanvas.moveTo(384,0);
-	// 	waveCanvas.lineTo(384,256);
-	// 	waveCanvas.moveTo(512,0);
-	// 	waveCanvas.lineTo(512,256);
-	// 	waveCanvas.stroke();
-	// 	waveCanvas.strokeStyle = "black";
-	// 	waveCanvas.beginPath();
-	// 	waveCanvas.moveTo(0,buf[0]);
-	// 	for (var i=1;i<512;i++) {
-	// 		waveCanvas.lineTo(i,128+(buf[i]*128));
-	// 	}
-	// 	waveCanvas.stroke();
-	// }
 
  	if (ac == -1) {
  		detectorElem.className = "vague";
@@ -349,6 +310,7 @@ function updatePitch( time ) {
 	 	var note =  noteFromPitch( pitch );
 		noteElem.innerHTML = noteStrings[note%12];
 		notenum = Number(note);
+
 		var detune = centsOffFromPitch( pitch, note );
 		if (detune == 0 ) {
 			detuneElem.className = "";
@@ -360,15 +322,15 @@ function updatePitch( time ) {
 				detuneElem.className = "sharp";
 			detuneAmount.innerHTML = Math.abs( detune );
 		}
+		console.log("pitch_calc", pitch_calc);
+		console.log("notenum", notenum);
+		console.log("detune", detune);
 
-		// console.log("Counter____", Counter)
-		// console.log("pitch_calc.......", pitch_calc)
-		// console.log("notenum", notenum)
-		// var startTime = Date.now()
-		// eval("var intervalCounter"+startTime+";");
-		if (pitch_calc == 1000 && notenum == 83 && detune == 21)
+		if (pitch_calc == 1002 || pitch_calc == 1000 && notenum == 83 && detune == 25 || detune == 21)
 		{	
-			console.log("pitch_calc", pitch_calc);
+			console.log("pitch_calc__1", pitch_calc);
+			console.log("notenum", notenum);
+			console.log("detune", detune);
 			delay = document.getElementById("milliseconds").innerHTML;
 			isStarted = !isStarted;
 			var startTime = Date.now();
@@ -384,27 +346,7 @@ function updatePitch( time ) {
 					isStarted = !isStarted;
 				}
 			}
-			
-			console.log("delay.....!", delay);
 		}
-
-		// if (pitch_calc == 1000 && notenum == 83 && detune == 21 && delay > 0.8)
-		// {	
-		// 	console.log("interval....", intervalCounter)
-		// 	// console.log("initialinterval", initialinterval)
-		// 	clearInterval(intervalCounter);
-		// 	// document.getElementById("milliseconds").innerHTML = delay;
-		// 	console.log(pitch_calc)
-		// 	// sourceNode.stop( 0 );
-		// 	// sourceNode = null;
-		// 	// analyser = null;
-		// 	isPlaying = false;
-		// 	document.getElementById("get_laytency").innerText = "Get Laytency";
-		// 	// if (!window.cancelAnimationFrame)
-		// 	// window.cancelAnimationFrame = window.webkitCancelAnimationFrame;
-		// 	// window.cancelAnimationFrame( rafID );
-		// 	// return;
-		// }
 	}
 	if (!window.requestAnimationFrame)
 	window.requestAnimationFrame = window.webkitRequestAnimationFrame;
